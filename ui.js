@@ -4,10 +4,7 @@
 
 // ===== UI Elements =====
 const $ = (s) => document.querySelector(s);
-const fileInput = $("#file");
-const goBtn = $("#go");
-const statusEl = $("#status");
-
+let fileInput, goBtn, statusEl;
 let loadedFile = null;
 
 // ===== Status Management =====
@@ -17,8 +14,16 @@ function setStatus(msg) {
 
 // ===== Event Handlers =====
 function initializeUI() {
+  console.log("initializeUI");
+  
+  // Get UI elements when DOM is ready
+  fileInput = $("#file");
+  goBtn = $("#go");
+  statusEl = $("#status");
+  
   // File input change handler
   fileInput?.addEventListener("change", () => {
+    console.log("fileInput change");
     loadedFile = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
     if (!loadedFile) {
       setStatus("Esperando archivo…");
