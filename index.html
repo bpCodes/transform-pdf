@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transformar PDF - Formatear Excel</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- SheetJS para leer/escribir Excel en el navegador -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <!-- Application modules -->
+  <script src="utils.js"></script>
+  <script src="processor.js"></script>
+  <script src="ui.js"></script>
+  <script src="app.js"></script>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Dar formato a Excel, 100% en el navegador</h1>
+    <p class="lead">Regla: mira columnas <strong>C–E</strong>. Si hay texto/valor, lo pasa a <strong>C</strong> y vacía <strong>B</strong>/<strong>C</strong>. Si no hay nada, <strong>elimina la fila</strong>.</p>
+
+    <!-- ÚNICO INPUT (estilizado grande y centrado) -->
+    <div class="file-zone">
+      <label class="file-label">
+        <span style="font-size:1.05rem">
+          <strong>Selecciona tu archivo .xlsx</strong><br/>
+          <span class="mono">Click para elegir</span>
+        </span>
+        <input id="file" class="file-input" type="file" accept=".xlsx,.xlsm,.xlsb,.xls" />
+      </label>
+      <div class="hint">No se sube a ningún servidor • Se procesa localmente en tu navegador</div>
+    </div>
+
+    <button id="go" class="btn" disabled>Procesar y descargar</button>
+    <div id="status" class="result">Esperando archivo…</div>
+
+    
+  </main>
+
+
+</body>
+</html>
