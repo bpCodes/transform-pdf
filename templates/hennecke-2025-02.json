@@ -19,7 +19,7 @@
       "name": "production_time",
       "kind": "scalar",
       "label": "Production Time",
-      "target_cell": "Q20"
+      "target_cell": "J20"
     },
     {
       "name": "charge",
@@ -35,7 +35,8 @@
       "value_header": "Last Cons.",
       "target_col": "X",
       "number_format": "eu",
-      "remove_empty_rows": true
+      "remove_empty_rows": true,
+      "section_label_col": "C"
     },
     {
       "name": "block_width",

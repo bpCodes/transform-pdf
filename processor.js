@@ -57,12 +57,14 @@ function applyTableColumnField(aoa, field) {
 
   // Find value_header column: search 5 rows before and after section start
   let headerCol = null;
+  let headerRowIdx = -1;
   for (let r = Math.max(0, startIdx - 5); r <= Math.min(startIdx + 5, aoa.length - 1); r++) {
     const row = Array.isArray(aoa[r]) ? aoa[r] : [];
     for (let c = 0; c < row.length; c++) {
       if (row[c] == null) continue;
       if (String(row[c]).trim().toLowerCase().includes(field.value_header.toLowerCase())) {
         headerCol = c;
+        headerRowIdx = r;
         break;
       }
     }
@@ -72,11 +74,21 @@ function applyTableColumnField(aoa, field) {
 
   // Resolve target column from letter (e.g. "X" → 23)
   const targetCol = Utils.parseCellAddress(field.target_col + "1").col;
+  const labelCol = field.section_label_col
+    ? Utils.parseCellAddress(field.section_label_col + "1").col
+    : null;
 
   for (let r = startIdx + 1; r < stopIdx; r++) {
     const row = aoa[r];
     if (!Array.isArray(row)) continue;
-    if (Utils.shouldSkipRow(row, SKIP_KEYWORDS, 1)) continue;
+
+    const isSkip = Utils.shouldSkipRow(row, SKIP_KEYWORDS, 1);
+
+    // For skip rows (e.g. "Total"): stamp the section_stop label into col C
+    if (isSkip && labelCol !== null) {
+      while (row.length <= labelCol) row.push(undefined);
+      row[labelCol] = field.section_stop;
+    }
 
     const raw = row[headerCol];
     if (raw == null || Utils.valOrEmpty(raw) === "") continue;
@@ -91,6 +103,11 @@ function applyTableColumnField(aoa, field) {
     row[targetCol] = val;
 
     if (headerCol !== targetCol) row[headerCol] = "";
+  }
+
+  // Clear the value_header label cell itself (e.g. "Last Cons." in header row)
+  if (headerRowIdx !== -1 && headerCol !== targetCol && Array.isArray(aoa[headerRowIdx])) {
+    aoa[headerRowIdx][headerCol] = "";
   }
 
   // Remove completely empty rows within the section (no cell has any content)
