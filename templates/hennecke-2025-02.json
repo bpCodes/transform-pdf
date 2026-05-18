@@ -44,7 +44,8 @@
       "target_col": "X",
       "number_format": "eu",
       "remove_empty_rows": true,
-      "section_label_col": "C"
+      "section_label_col": "C",
+      "normalize_label_cols": ["C", "E"]
     },
     {
       "name": "block_width",

@@ -85,6 +85,23 @@ function applyTableColumnField(aoa, field) {
     const row = aoa[r];
     if (!Array.isArray(row)) continue;
 
+    // Unify label columns: move label to primary col if it's in a secondary col
+    if (field.normalize_label_cols && field.normalize_label_cols.length > 1) {
+      const normCols = field.normalize_label_cols.map(l => Utils.parseCellAddress(l + "1").col);
+      const primaryCol = normCols[0];
+      if (!row[primaryCol] || Utils.valOrEmpty(row[primaryCol]) === "") {
+        for (let ci = 1; ci < normCols.length; ci++) {
+          const v = Utils.valOrEmpty(row[normCols[ci]]);
+          if (v !== "") {
+            while (row.length <= primaryCol) row.push(undefined);
+            row[primaryCol] = row[normCols[ci]];
+            row[normCols[ci]] = "";
+            break;
+          }
+        }
+      }
+    }
+
     const isSkip = Utils.shouldSkipRow(row, SKIP_KEYWORDS, 1);
 
     // For skip rows (e.g. "Total"): stamp the section_stop label into col C
