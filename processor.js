@@ -22,10 +22,18 @@ function applyScalarField(aoa, field) {
   const row = aoa[labelCell.row];
   let srcCol = null;
   let srcVal = null;
-  for (let c = labelCell.col + 1; c < row.length; c++) {
+  const targetIdx = field.value_index ?? 0;
+  const scanFromCol = field.scan_from_col
+    ? Utils.parseCellAddress(field.scan_from_col + "1").col
+    : labelCell.col + 1;
+  let count = 0;
+  for (let c = scanFromCol; c < row.length; c++) {
     const v = Utils.valOrEmpty(row[c]);
     // skip intermediate sub-labels (cells that end with ":")
-    if (v !== "" && !v.endsWith(":")) { srcCol = c; srcVal = v; break; }
+    if (v !== "" && !v.endsWith(":")) {
+      if (count === targetIdx) { srcCol = c; srcVal = v; break; }
+      count++;
+    }
   }
   if (srcVal === null) throw new Error(`Field "${field.name}": no value found to the right of label "${field.label}"`);
 
@@ -43,9 +51,6 @@ function applyScalarField(aoa, field) {
   const target = Utils.parseCellAddress(field.target_cell);
   Utils.setCell(aoa, target.row, target.col, val);
 
-  if (srcCol !== target.col || labelCell.row !== target.row) {
-    aoa[labelCell.row][srcCol] = "";
-  }
 }
 
 function applyTableColumnField(aoa, field) {
@@ -57,14 +62,12 @@ function applyTableColumnField(aoa, field) {
 
   // Find value_header column: search 5 rows before and after section start
   let headerCol = null;
-  let headerRowIdx = -1;
   for (let r = Math.max(0, startIdx - 5); r <= Math.min(startIdx + 5, aoa.length - 1); r++) {
     const row = Array.isArray(aoa[r]) ? aoa[r] : [];
     for (let c = 0; c < row.length; c++) {
       if (row[c] == null) continue;
       if (String(row[c]).trim().toLowerCase().includes(field.value_header.toLowerCase())) {
         headerCol = c;
-        headerRowIdx = r;
         break;
       }
     }
@@ -102,12 +105,6 @@ function applyTableColumnField(aoa, field) {
     while (row.length <= targetCol) row.push(undefined);
     row[targetCol] = val;
 
-    if (headerCol !== targetCol) row[headerCol] = "";
-  }
-
-  // Clear the value_header label cell itself (e.g. "Last Cons." in header row)
-  if (headerRowIdx !== -1 && headerCol !== targetCol && Array.isArray(aoa[headerRowIdx])) {
-    aoa[headerRowIdx][headerCol] = "";
   }
 
   // Remove completely empty rows within the section (no cell has any content)
@@ -150,8 +147,6 @@ function applyLabeledInSectionField(aoa, field) {
   while (row.length <= targetCol) row.push(undefined);
   row[targetCol] = val;
 
-  // Clear source only if it differs from target
-  if (headerCol !== targetCol) row[headerCol] = "";
 }
 
 async function applyTemplateFields(aoa, templateName) {

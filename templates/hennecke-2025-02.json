@@ -22,6 +22,14 @@
       "target_cell": "J20"
     },
     {
+      "name": "production_date",
+      "kind": "scalar",
+      "label": "Production Time",
+      "target_cell": "P20",
+      "scan_from_col": "K",
+      "value_index": 2
+    },
+    {
       "name": "charge",
       "kind": "scalar",
       "label": "Charge",
