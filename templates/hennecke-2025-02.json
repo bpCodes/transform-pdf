@@ -27,7 +27,7 @@
       "label": "Production Time",
       "target_cell": "P20",
       "scan_from_col": "K",
-      "value_index": 2
+      "value_index": -1
     },
     {
       "name": "charge",

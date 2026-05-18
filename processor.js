@@ -8,7 +8,7 @@ const SKIP_KEYWORDS = ["Total"];
 // ===== Template Loading =====
 
 async function loadTemplate(name) {
-  const resp = await fetch(`./templates/${name}.json`);
+  const resp = await fetch(`./templates/${name}.json`, { cache: "no-store" });
   if (!resp.ok) throw new Error(`Template not found: ${name}`);
   return resp.json();
 }
@@ -26,13 +26,22 @@ function applyScalarField(aoa, field) {
   const scanFromCol = field.scan_from_col
     ? Utils.parseCellAddress(field.scan_from_col + "1").col
     : labelCell.col + 1;
-  let count = 0;
-  for (let c = scanFromCol; c < row.length; c++) {
-    const v = Utils.valOrEmpty(row[c]);
-    // skip intermediate sub-labels (cells that end with ":")
-    if (v !== "" && !v.endsWith(":")) {
-      if (count === targetIdx) { srcCol = c; srcVal = v; break; }
-      count++;
+
+  if (targetIdx === -1) {
+    // -1 means last non-empty, non-colon value in the row
+    for (let c = scanFromCol; c < row.length; c++) {
+      const v = Utils.valOrEmpty(row[c]);
+      if (v !== "" && !v.endsWith(":")) { srcCol = c; srcVal = v; }
+    }
+  } else {
+    let count = 0;
+    for (let c = scanFromCol; c < row.length; c++) {
+      const v = Utils.valOrEmpty(row[c]);
+      // skip intermediate sub-labels (cells that end with ":")
+      if (v !== "" && !v.endsWith(":")) {
+        if (count === targetIdx) { srcCol = c; srcVal = v; break; }
+        count++;
+      }
     }
   }
   if (srcVal === null) throw new Error(`Field "${field.name}": no value found to the right of label "${field.label}"`);
