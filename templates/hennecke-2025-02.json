@@ -19,7 +19,7 @@
       "name": "production_time",
       "kind": "scalar",
       "label": "Production Time",
-      "target_cell": "P20"
+      "target_cell": "Q20"
     },
     {
       "name": "charge",
@@ -34,7 +34,8 @@
       "section_stop": "2 - Pressure",
       "value_header": "Last Cons.",
       "target_col": "X",
-      "number_format": "eu"
+      "number_format": "eu",
+      "remove_empty_rows": true
     },
     {
       "name": "block_width",
@@ -43,7 +44,7 @@
       "section_stop": "5 - Segments",
       "label": "Anchura de bloque",
       "value_header": "Set Value",
-      "target_col": "O"
+      "target_col": "N"
     },
     {
       "name": "block_height",
@@ -52,7 +53,7 @@
       "section_stop": "5 - Segments",
       "label": "Altura de bloque",
       "value_header": "Set Value",
-      "target_col": "O"
+      "target_col": "N"
     },
     {
       "name": "block_density",
@@ -61,7 +62,7 @@
       "section_stop": "5 - Segments",
       "label": "Densidad de bloque",
       "value_header": "Set Value",
-      "target_col": "O"
+      "target_col": "N"
     }
   ]
 }

@@ -92,6 +92,16 @@ function applyTableColumnField(aoa, field) {
 
     if (headerCol !== targetCol) row[headerCol] = "";
   }
+
+  // Remove completely empty rows within the section (no cell has any content)
+  if (field.remove_empty_rows) {
+    for (let r = stopIdx - 1; r >= startIdx + 1; r--) {
+      const row = aoa[r];
+      if (!Array.isArray(row) || row.every(c => c == null || String(c).trim() === "")) {
+        aoa.splice(r, 1);
+      }
+    }
+  }
 }
 
 function applyLabeledInSectionField(aoa, field) {
