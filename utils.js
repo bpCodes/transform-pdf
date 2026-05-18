@@ -2,8 +2,6 @@
  * Utility functions for Excel processing
  */
 
-// ===== Configuration =====
-const COL_X = 24;                 // "X" = 24 (1-based). En AOA es índice 23.
 const TREAT_PARENS_AS_NEGATIVE = false; // true => "(1,23)" -> -1.23 ; false => 1.23
 
 // ===== Helper Functions =====
@@ -21,7 +19,6 @@ function pickFirstNonEmpty(arr) {
 }
 
 // Encuentra índice de fila que contenga "text" (case-insensitive) partiendo de findColStart (1-based)
-// Busca en esa fila desde esa columna hacia la derecha hasta el final.
 // startFromIndex: índice de fila (0-based) desde donde iniciar la búsqueda (default 0).
 function findRowIndexByText(aoa, text, findColStart = 1, startFromIndex = 0) {
   const needle = String(text ?? "").trim().toLowerCase();
@@ -48,41 +45,27 @@ function ensureRef(ws, aoa) {
   ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: maxRow, c: maxCol } });
 }
 
-// ===== Number Parsing Functions =====
-
-// Conversión para una fila
-function convertColumnXInRow(row) {
-  const idx = COL_X - 1; // 0-based
-  const raw = row[idx];
-  const num = parseSingleEuroNumber(raw, { parensAsNegative: TREAT_PARENS_AS_NEGATIVE });
-  row[idx] = Number.isFinite(num) ? num : ""; // si no se pudo parsear, dejar vacío
-}
+// ===== Number Parsing =====
 
 // Parser para un solo número en formato EU
 function parseSingleEuroNumber(value, opts = {}) {
   const { parensAsNegative = false } = opts;
   if (value === undefined || value === null) return NaN;
 
-  // String limpieza básica
   let s = String(value).trim();
   if (!s) return NaN;
 
-  // Detectar paréntesis (contabilidad)
   const hasParens = /^\(.*\)$/.test(s);
   if (hasParens) s = s.replace(/[()]/g, "");
 
-  // Quitar espacios
   s = s.replace(/\s+/g, "");
 
-  // Si hay coma y punto, asumimos que el ÚLTIMO símbolo es el separador decimal.
   const lastComma = s.lastIndexOf(",");
   const lastDot   = s.lastIndexOf(".");
   const decimalSep = lastComma > lastDot ? "," : (lastDot >= 0 ? "." : ",");
 
   if (decimalSep === ",") {
-    // puntos como miles -> fuera
     s = s.replace(/\./g, "");
-    // la coma decimal -> punto
     const parts = s.split(",");
     if (parts.length > 1) {
       const dec = parts.pop();
@@ -91,9 +74,7 @@ function parseSingleEuroNumber(value, opts = {}) {
       s = s.replace(",", ".");
     }
   } else {
-    // comas como miles -> fuera
     s = s.replace(/,/g, "");
-    // si hubiera múltiples puntos, dejamos solo el último como decimal
     const parts = s.split(".");
     if (parts.length > 2) {
       const dec = parts.pop();
@@ -108,7 +89,54 @@ function parseSingleEuroNumber(value, opts = {}) {
   return num;
 }
 
-// ===== Row Processing Functions =====
+// ===== Cell Address Utilities =====
+
+// Converts A1 notation ("J22") to 0-based {row, col}
+function parseCellAddress(addr) {
+  const match = String(addr).trim().match(/^([A-Za-z]+)(\d+)$/);
+  if (!match) throw new Error(`Invalid cell address: ${addr}`);
+  const colStr = match[1].toUpperCase();
+  const rowNum = parseInt(match[2], 10);
+  let col = 0;
+  for (let i = 0; i < colStr.length; i++) {
+    col = col * 26 + (colStr.charCodeAt(i) - 64);
+  }
+  return { row: rowNum - 1, col: col - 1 };
+}
+
+// Converts 0-based {row, col} back to A1 notation
+function encodeCellAddress(row, col) {
+  let c = col + 1;
+  let colStr = "";
+  while (c > 0) {
+    const rem = (c - 1) % 26;
+    colStr = String.fromCharCode(65 + rem) + colStr;
+    c = Math.floor((c - 1) / 26);
+  }
+  return colStr + (row + 1);
+}
+
+// Finds the first cell containing labelText (case-insensitive substring); returns {row, col} or null
+function findLabelCell(aoa, labelText) {
+  const needle = String(labelText).trim().toLowerCase();
+  for (let r = 0; r < aoa.length; r++) {
+    const row = Array.isArray(aoa[r]) ? aoa[r] : [];
+    for (let c = 0; c < row.length; c++) {
+      if (row[c] == null) continue;
+      if (String(row[c]).trim().toLowerCase().includes(needle)) return { row: r, col: c };
+    }
+  }
+  return null;
+}
+
+// Sets aoa[row][col] = value, extending rows/cols as needed
+function setCell(aoa, row, col, value) {
+  while (aoa.length <= row) aoa.push([]);
+  while (aoa[row].length <= col) aoa[row].push(undefined);
+  aoa[row][col] = value;
+}
+
+// ===== Row Processing =====
 
 function shouldSkipRow(row, keywords = [], findColStart = 1) {
   if (!Array.isArray(keywords) || keywords.length === 0) return false;
@@ -137,7 +165,10 @@ window.Utils = {
   pickFirstNonEmpty,
   findRowIndexByText,
   ensureRef,
-  convertColumnXInRow,
   parseSingleEuroNumber,
-  shouldSkipRow
+  shouldSkipRow,
+  parseCellAddress,
+  encodeCellAddress,
+  findLabelCell,
+  setCell
 };

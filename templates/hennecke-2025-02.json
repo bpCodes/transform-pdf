@@ -1,0 +1,78 @@
+{
+  "name": "hennecke-2025-02",
+  "fields": [
+    {
+      "name": "recipe",
+      "kind": "scalar",
+      "label": "Recipe",
+      "target_cell": "J14"
+    },
+    {
+      "name": "block_length",
+      "kind": "scalar",
+      "label": "Block Length",
+      "target_cell": "J22",
+      "suffix": " m",
+      "number_format": "eu"
+    },
+    {
+      "name": "production_time",
+      "kind": "scalar",
+      "label": "Production Time",
+      "target_cell": "J20"
+    },
+    {
+      "name": "production_date",
+      "kind": "scalar",
+      "label": "Production Time",
+      "target_cell": "P20",
+      "scan_from_col": "K",
+      "value_index": -1
+    },
+    {
+      "name": "charge",
+      "kind": "scalar",
+      "label": "Charge",
+      "target_cell": "U22"
+    },
+    {
+      "name": "raw_material_consumption",
+      "kind": "table_column",
+      "section_start": "1 - Pumps",
+      "section_stop": "2 - Pressure",
+      "value_header": "Last Cons.",
+      "target_col": "X",
+      "number_format": "eu",
+      "remove_empty_rows": true,
+      "section_label_col": "C",
+      "normalize_label_cols": ["C", "E"]
+    },
+    {
+      "name": "block_width",
+      "kind": "labeled_in_section",
+      "section_start": "4 - Plant",
+      "section_stop": "5 - Segments",
+      "label": "Anchura de bloque",
+      "value_header": "Set Value",
+      "target_col": "N"
+    },
+    {
+      "name": "block_height",
+      "kind": "labeled_in_section",
+      "section_start": "4 - Plant",
+      "section_stop": "5 - Segments",
+      "label": "Altura de bloque",
+      "value_header": "Set Value",
+      "target_col": "N"
+    },
+    {
+      "name": "block_density",
+      "kind": "labeled_in_section",
+      "section_start": "4 - Plant",
+      "section_stop": "5 - Segments",
+      "label": "Densidad de bloque",
+      "value_header": "Set Value",
+      "target_col": "N"
+    }
+  ]
+}
